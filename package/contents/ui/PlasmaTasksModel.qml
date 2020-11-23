@@ -28,10 +28,13 @@ Item {
     id: plasmaTasksItem
     property bool filterByScreen: true
 
-    readonly property bool existsWindowActive: lastActiveTaskItem && tasksRepeater.count > 0 && lastActiveTaskItem.isActive
-    readonly property bool existsWindowShown: lastActiveTaskItem && tasksRepeater.count > 0 && !lastActiveTaskItem.isMinimized
+    readonly property bool existsWindowActive: operatingTaskItem && tasksRepeater.count > 0 && operatingTaskItem.isActive
+    readonly property bool existsWindowShown: operatingTaskItem && tasksRepeater.count > 0 && !operatingTaskItem.isMinimized
+    readonly property bool existsWindowMaximized: operatingTaskItem && tasksRepeater.count > 0 && operatingTaskItem.isMaximized && !operatingTaskItem.isMinimized
 
+    readonly property Item operatingTaskItem: root.useAnyMaximizedWindow ? toplevelMaximizedTaskItem : lastActiveTaskItem
     property Item lastActiveTaskItem: null
+    property Item toplevelMaximizedTaskItem: null
 
     // To get current activity name
     TaskManager.ActivityInfo {
@@ -68,22 +71,30 @@ Item {
                 readonly property bool isActive: IsActive === true ? true : false
                 readonly property bool isOnAllDesktops: IsOnAllVirtualDesktops === true ? true : false
                 readonly property bool isKeepAbove: IsKeepAbove === true ? true : false
-
                 readonly property bool isClosable: IsClosable === true ? true : false
                 readonly property bool isMinimizable: IsMinimizable === true ? true : false
                 readonly property bool isMaximizable: IsMaximizable === true ? true : false
                 readonly property bool isVirtualDesktopsChangeable: IsVirtualDesktopsChangeable === true ? true : false
+                readonly property int stackingOrder: StackingOrder
+
+                onIsMaximizedChanged: updateToplevelMaximizedWindow();
+
+                onIsMinimizedChanged: updateToplevelMaximizedWindow();
 
                 onIsActiveChanged: {
                     if (isActive) {
                         plasmaTasksItem.lastActiveTaskItem = task;
                     }
+
+                    updateToplevelMaximizedWindow();
                 }
 
                 Component.onDestruction: {
                     if (plasmaTasksItem.lastActiveTaskItem === task) {
                         plasmaTasksItem.lastActiveTaskItem = null;
                     }
+
+                    updateToplevelMaximizedWindow();
                 }
 
                 function modelIndex(){
@@ -118,32 +129,47 @@ Item {
     }
 
     function toggleMaximized() {
-        if (lastActiveTaskItem) {
-            lastActiveTaskItem.toggleMaximized();
+        if (operatingTaskItem) {
+            operatingTaskItem.toggleMaximized();
         }
     }
 
     function toggleMinimized() {
-        if (lastActiveTaskItem) {
-            lastActiveTaskItem.toggleMinimized();
+        if (operatingTaskItem) {
+            operatingTaskItem.toggleMinimized();
         }
     }
 
     function toggleClose() {
-        if (lastActiveTaskItem) {
-            lastActiveTaskItem.toggleClose();
+        if (operatingTaskItem) {
+            operatingTaskItem.toggleClose();
         }
     }
 
     function togglePinToAllDesktops() {
-        if (lastActiveTaskItem) {
-            lastActiveTaskItem.togglePinToAllDesktops();
+        if (operatingTaskItem) {
+            operatingTaskItem.togglePinToAllDesktops();
         }
     }
 
     function toggleKeepAbove(){
-        if (lastActiveTaskItem) {
-            lastActiveTaskItem.toggleKeepAbove();
+        if (operatingTaskItem) {
+            operatingTaskItem.toggleKeepAbove();
         }
+    }
+
+    function updateToplevelMaximizedWindow(){
+        var maxStackingOrder = -10
+        var taskWindow = null;
+        for (var i = 0; i < tasksRepeater.count; i++ ) {
+
+            var currentTaskWindow = tasksRepeater.itemAt(i);
+            if (currentTaskWindow.isMaximized && !currentTaskWindow.isMinimized && currentTaskWindow.stackingOrder > maxStackingOrder) {
+                maxStackingOrder = currentTaskWindow.stackingOrder;
+                taskWindow = currentTaskWindow;
+            }
+        }
+
+        toplevelMaximizedTaskItem = taskWindow;
     }
 }

@@ -23,44 +23,45 @@ Item {
     id: latteWindowsTracker
     property bool filterByScreen: true
 
-    readonly property bool existsWindowActive: selectedTracker.lastActiveWindow.isValid && !lastActiveTaskItem.isMinimized && lastActiveTaskItem.isActive
-    readonly property bool existsWindowShown: selectedTracker.lastActiveWindow.isValid && !lastActiveTaskItem.isMinimized
+    readonly property bool existsWindowActive: operatingWindow.isValid && !operatingTaskItem.isMinimized && operatingTaskItem.isActive
+    readonly property bool existsWindowShown: operatingWindow.isValid && !operatingTaskItem.isMinimized
+    readonly property bool existsWindowMaximized: operatingWindow.isValid && operatingTaskItem.isMaximized && !operatingTaskItem.isMinimized
 
     readonly property QtObject selectedTracker: filterByScreen ? latteBridge.windowsTracker.currentScreen : latteBridge.windowsTracker.allScreens
+    readonly property QtObject operatingWindow: root.useAnyMaximizedWindow ? selectedTracker.toplevelMaximizedWindow : selectedTracker.lastActiveWindow
 
-    readonly property Item lastActiveTaskItem: Item {
-        readonly property string title: selectedTracker.lastActiveWindow.display
-        readonly property bool isMinimized: selectedTracker.lastActiveWindow.isMinimized
-        readonly property bool isMaximized: selectedTracker.lastActiveWindow.isMaximized
-        readonly property bool isActive: selectedTracker.lastActiveWindow.isActive
-        readonly property bool isOnAllDesktops: selectedTracker.lastActiveWindow.isOnAllDesktops
-        readonly property bool isKeepAbove: selectedTracker.lastActiveWindow.isKeepAbove
-
-        readonly property bool isClosable: selectedTracker.lastActiveWindow.hasOwnProperty("isClosable") ? selectedTracker.lastActiveWindow.isClosable : true
-        readonly property bool isMinimizable: selectedTracker.lastActiveWindow.hasOwnProperty("isMinimizable") ? selectedTracker.lastActiveWindow.isMinimizable : true
-        readonly property bool isMaximizable: selectedTracker.lastActiveWindow.hasOwnProperty("isMaximizable") ? selectedTracker.lastActiveWindow.isMaximizable : true
-        readonly property bool isVirtualDesktopsChangeable: selectedTracker.lastActiveWindow.hasOwnProperty("isVirtualDesktopsChangeable") ?
-                                                                selectedTracker.lastActiveWindow.isVirtualDesktopsChangeable : true
+    readonly property Item operatingTaskItem: Item {
+        readonly property string title: operatingWindow.display
+        readonly property bool isMinimized: operatingWindow.isMinimized
+        readonly property bool isMaximized: operatingWindow.isMaximized
+        readonly property bool isActive: operatingWindow.isActive
+        readonly property bool isOnAllDesktops: operatingWindow.isOnAllDesktops
+        readonly property bool isKeepAbove: operatingWindow.isKeepAbove
+        readonly property bool isClosable: operatingWindow.hasOwnProperty("isClosable") ? operatingWindow.isClosable : true
+        readonly property bool isMinimizable: operatingWindow.hasOwnProperty("isMinimizable") ? operatingWindow.isMinimizable : true
+        readonly property bool isMaximizable: operatingWindow.hasOwnProperty("isMaximizable") ? operatingWindow.isMaximizable : true
+        readonly property bool isVirtualDesktopsChangeable: operatingWindow.hasOwnProperty("isVirtualDesktopsChangeable") ?
+                                                                operatingWindow.isVirtualDesktopsChangeable : true
     }
 
     function toggleMaximized() {
-        selectedTracker.lastActiveWindow.requestToggleMaximized();
+        operatingWindow.requestToggleMaximized();
     }
 
     function toggleMinimized() {
-        selectedTracker.lastActiveWindow.requestToggleMinimized();
+        operatingWindow.requestToggleMinimized();
     }
 
     function toggleClose() {
-        selectedTracker.lastActiveWindow.requestClose();
+        operatingWindow.requestClose();
     }
 
     function togglePinToAllDesktops() {
-        selectedTracker.lastActiveWindow.requestToggleIsOnAllDesktops();
+        operatingWindow.requestToggleIsOnAllDesktops();
     }
 
     function toggleKeepAbove(){
-        selectedTracker.lastActiveWindow.requestToggleKeepAbove();
+        operatingWindow.requestToggleKeepAbove();
     }
 }
 

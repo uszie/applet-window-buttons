@@ -51,6 +51,8 @@ Item {
 
     readonly property bool plasma515: AppletDecoration.Environment.plasmaDesktopVersion >= AppletDecoration.Environment.makeVersion(5,15,0)
 
+    readonly property bool useAnyMaximizedWindow: visibility === AppletDecoration.Types.AnyMaximizedWindow ? true : false
+
     readonly property bool mustHide: {
         if (visibility === AppletDecoration.Types.AlwaysVisible || inEditMode) {
             return false;
@@ -64,7 +66,12 @@ Item {
                 && (!isLastActiveWindowMaximized || (inPlasmaPanel && !existsWindowActive))) {
             return true;
         }
+
         if (visibility === AppletDecoration.Types.ShownWindowExists && !existsWindowShown) {
+            return true;
+        }
+
+        if (useAnyMaximizedWindow && !existsWindowMaximized) {
             return true;
         }
 
@@ -166,6 +173,9 @@ Item {
     readonly property bool existsWindowShown: (windowInfoLoader.item && windowInfoLoader.item.existsWindowShown)
                                               || containmentIdentifierTimer.running
 
+    readonly property bool existsWindowMaximized: (windowInfoLoader.item && windowInfoLoader.item.existsWindowMaximized)
+                                              || containmentIdentifierTimer.running
+
     readonly property bool isLastActiveWindowPinned: lastActiveTaskItem && existsWindowShown && lastActiveTaskItem.isOnAllDesktops
     readonly property bool isLastActiveWindowMaximized: lastActiveTaskItem && existsWindowShown && lastActiveTaskItem.isMaximized
     readonly property bool isLastActiveWindowKeepAbove: lastActiveTaskItem && existsWindowShown && lastActiveTaskItem.isKeepAbove
@@ -182,7 +192,7 @@ Item {
     readonly property bool inPlasmaPanel: latteBridge === null
     readonly property bool inLatte: latteBridge !== null
 
-    readonly property Item lastActiveTaskItem: windowInfoLoader.item.lastActiveTaskItem
+    readonly property Item lastActiveTaskItem: windowInfoLoader.item.operatingTaskItem
     // END Window properties
 
     // START decoration properties
