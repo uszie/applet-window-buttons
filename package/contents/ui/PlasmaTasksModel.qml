@@ -76,6 +76,7 @@ Item {
                 readonly property bool isMaximizable: IsMaximizable === true ? true : false
                 readonly property bool isVirtualDesktopsChangeable: IsVirtualDesktopsChangeable === true ? true : false
                 readonly property int stackingOrder: StackingOrder
+                readonly property int winId: WinIdList[0]
 
                 onIsMaximizedChanged: updateToplevelMaximizedWindow();
 
