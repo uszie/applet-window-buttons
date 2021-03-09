@@ -76,7 +76,7 @@ Item {
                 readonly property bool isMaximizable: IsMaximizable === true ? true : false
                 readonly property bool isVirtualDesktopsChangeable: IsVirtualDesktopsChangeable === true ? true : false
                 readonly property int stackingOrder: StackingOrder
-                readonly property int winId: WinIdList[0]
+                readonly property variant winId: WinIdList[0]
 
                 onIsMaximizedChanged: updateToplevelMaximizedWindow();
 
@@ -90,12 +90,18 @@ Item {
                     updateToplevelMaximizedWindow();
                 }
 
+                onStackingOrderChanged: {
+                    updateToplevelMaximizedWindow();
+                }
+
                 Component.onDestruction: {
                     if (plasmaTasksItem.lastActiveTaskItem === task) {
                         plasmaTasksItem.lastActiveTaskItem = null;
                     }
 
-                    updateToplevelMaximizedWindow();
+                    if (plasmaTasksItem.toplevelMaximizedTaskItem === task) {
+                        plasmaTasksItem.toplevelMaximizedTaskItem = null;
+                    }
                 }
 
                 function modelIndex(){
@@ -159,12 +165,16 @@ Item {
         }
     }
 
-    function updateToplevelMaximizedWindow(){
-        var maxStackingOrder = -10
+    function updateToplevelMaximizedWindow() {
+        if (!root.useAnyMaximizedWindow) {
+            return;
+        }
+
+        var maxStackingOrder = -1
         var taskWindow = null;
         for (var i = 0; i < tasksRepeater.count; i++ ) {
-
             var currentTaskWindow = tasksRepeater.itemAt(i);
+            console.debug("Buttons: ", "stackingOrder=", currentTaskWindow.stackingOrder, "winId=", currentTaskWindow.winId, "title=", currentTaskWindow.title);
             if (currentTaskWindow.isMaximized && !currentTaskWindow.isMinimized && currentTaskWindow.stackingOrder > maxStackingOrder) {
                 maxStackingOrder = currentTaskWindow.stackingOrder;
                 taskWindow = currentTaskWindow;

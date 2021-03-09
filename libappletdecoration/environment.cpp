@@ -26,6 +26,9 @@
 // Plasma
 #include <plasma/version.h>
 
+// KDE
+#include <kwindowsystem.h>
+
 namespace Decoration {
 namespace Applet {
 
@@ -37,6 +40,21 @@ Environment::Environment(QObject *parent)
 Environment::~Environment()
 {
     qDebug() << staticMetaObject.className() << "destructed";
+}
+
+bool Environment::compositingActive() const
+{
+    return KWindowSystem::compositingActive();
+}
+
+bool Environment::isPlatformX11() const
+{
+    return KWindowSystem::isPlatformX11();
+}
+
+bool Environment::isPlatformWayland() const
+{
+    return KWindowSystem::isPlatformWayland();
 }
 
 uint Environment::frameworksVersion() const

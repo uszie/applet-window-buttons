@@ -50,8 +50,34 @@ Item {
     readonly property bool inEditMode: latteInEditMode || plasmoid.userConfiguring
 
     readonly property bool plasma515: AppletDecoration.Environment.plasmaDesktopVersion >= AppletDecoration.Environment.makeVersion(5,15,0)
+    readonly property bool isStackingOrderSupported: {
+        var supported = false;
 
-    readonly property bool useAnyMaximizedWindow: visibility === AppletDecoration.Types.AnyMaximizedWindow ? true : false
+        if (latteBridge) {
+            if (latteBridge.version < latteBridge.actions.version(0,9,75)) { // TODO: replace with version that actually has the patches
+                supported = false;
+            } else if (AppletDecoration.Environment.isPlatformX11) {
+                supported = true;
+            } else if (AppletDecoration.Environment.isPlatformWayland &&
+                    AppletDecoration.Environment.frameworksVersion >= AppletDecoration.Environment.makeVersion(5,73,0)) {
+                supported = true;
+            }
+        } else {
+            if (AppletDecoration.Environment.isPlatformX11 &&
+                    AppletDecoration.Environment.plasmaDesktopVersion >= AppletDecoration.Environment.makeVersion(5,18,0)) {
+                supported = true;
+            } else if (AppletDecoration.Environment.isPlatformWayland &&
+                    AppletDecoration.Environment.plasmaDesktopVersion >= AppletDecoration.Environment.makeVersion(5,21,2)) { // TODO: replace with version that actually has the patches
+                supported = true;
+            }
+        }
+
+        plasmoid.configuration.isStackingOrderSupported = supported;
+
+        return supported;
+    }
+    
+    readonly property bool useAnyMaximizedWindow: visibility === AppletDecoration.Types.AnyMaximizedWindow
 
     readonly property bool mustHide: {
         if (visibility === AppletDecoration.Types.AlwaysVisible || inEditMode) {
@@ -71,7 +97,7 @@ Item {
             return true;
         }
 
-        if (useAnyMaximizedWindow && !existsWindowMaximized) {
+        if (visibility === AppletDecoration.Types.AnyMaximizedWindow && !existsWindowMaximized) {
             return true;
         }
 
@@ -87,7 +113,10 @@ Item {
 
     readonly property int containmentType: plasmoid.configuration.containmentType
     readonly property int disabledMaximizedBorders: plasmoid.configuration.disabledMaximizedBorders
-    readonly property int visibility: plasmoid.configuration.visibility
+    readonly property int visibility: (plasmoid.configuration.visibility === AppletDecoration.Types.AnyMaximizedWindow) &&
+                                      !isStackingOrderSupported ?
+                                          AppletDecoration.Types.ActiveMaximizedWindow :
+                                          plasmoid.configuration.visibility
 
     readonly property int minimumWidth: {
         if (plasmoid.formFactor === PlasmaCore.Types.Horizontal) {

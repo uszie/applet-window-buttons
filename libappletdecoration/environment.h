@@ -31,6 +31,10 @@ namespace Applet {
 class Environment final : public QObject
 {
     Q_OBJECT
+
+    Q_PROPERTY(bool compositingActive READ compositingActive NOTIFY fakeSignalChanged)
+    Q_PROPERTY(bool isPlatformX11 READ isPlatformX11 NOTIFY fakeSignalChanged)
+    Q_PROPERTY(bool isPlatformWayland READ isPlatformWayland NOTIFY fakeSignalChanged)
     Q_PROPERTY(uint frameworksVersion READ frameworksVersion NOTIFY frameworksVersionChanged)
     Q_PROPERTY(uint plasmaDesktopVersion READ plasmaDesktopVersion NOTIFY plasmaDesktopVersionChanged)
 
@@ -38,8 +42,8 @@ public:
     virtual ~Environment();
 
     bool compositingActive() const;
+    bool isPlatformX11() const;
     bool isPlatformWayland() const;
-
     uint frameworksVersion() const;
     uint plasmaDesktopVersion();
 
@@ -56,6 +60,7 @@ public slots:
     Q_INVOKABLE uint makeVersion(uint major, uint minor, uint release) const;
 
 signals:
+    void fakeSignalChanged();
     void frameworksVersionChanged();
     void plasmaDesktopVersionChanged();
 

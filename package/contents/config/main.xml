@@ -35,6 +35,10 @@
       <label>when the applet will be visible</label>
       <default>0</default>
     </entry>
+    <entry name="isStackingOrderSupported" type="Bool">
+        <default>false</default>
+        <label>Do not change it is used to communicate stacking order support between the applet and the config widget</label>
+    </entry>
     <entry name="filterByScreen" type="Bool">
       <default>true</default>
       <label>if false active window can be on any screen</label>
